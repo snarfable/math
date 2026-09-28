@@ -7,3 +7,5 @@
 #else
 #define USE_GMXLIB_LEGACY
 #endif
+
+#define HAVE_DOUBLE

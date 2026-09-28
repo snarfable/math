@@ -24,7 +24,9 @@
 #define VC_GRPNAME_MAX_LEN 64
 #define VC_NDX_LINE_MAX_LEN 64
 
-#if HAVE_DOUBLE == 1  /* This is set in the configure script with --enable-double=yes */
+#include "math_config.h"
+
+#ifdef HAVE_DOUBLE  /* This is set in the configure script with --enable-double=yes */
 	typedef double t_real;
 #else
 	typedef float t_real;

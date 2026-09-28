@@ -14,7 +14,7 @@
 //#define PUNITY_USE_KDTREES
 
 /* Typedef this so it can be used to make an array */
-typedef double (*wfsd_t)(int,int,double,double*);
+typedef t_real (*wfsd_t)(int,int,t_real,t_real*);
 
 /**
  * The partition of unity data structure
@@ -34,28 +34,28 @@ typedef struct
 	/**
 	 * List of the actual points
 	 */
-	double *pts;
+	t_real *pts;
 
 	/**
 	 * List of dilation factors for each point
 	 */
-	double *dlt;
+	t_real *dlt;
 
 	/**
 	 * Window function pointer
 	 */
-	double (*wfs)(int,double,double*);
+	t_real (*wfs)(int,t_real,t_real*);
 
 	/**
 	 * Pointer to function returning gradient of
 	 * the window function
 	 */
-	double (*wfsd)(int,int,double,double*);
+	t_real (*wfsd)(int,int,t_real,t_real*);
 
 	/**
 	 * Maximum value of dilation factor
 	 */
-	double rmax;
+	t_real rmax;
 
 	/**
 	 * The kdtree storing the point list for
@@ -84,7 +84,7 @@ typedef struct
 	 * periodic over the given rectangular domain;
 	 * "rpb" = "rectangular periodic boundaries"
 	 */
-	double *rpb;
+	t_real *rpb;
 } punity_t;
 
 typedef struct
@@ -125,17 +125,17 @@ typedef struct
 	 * if ltg[2][1] = -3, then the second basis function
 	 * on particle 2 is extf[2]
 	 */
-	double (**extf)(int*,double*);
+	t_real (**extf)(int*,t_real*);
 } pubasis_t;
 
-double cubic_window( int dim_in, double a_in, double *x_in )
+t_real cubic_window( int dim_in, t_real a_in, t_real *x_in )
 {
         int i;
-        double z = 0.0;
+        t_real z = 0.0;
 #ifdef PUNITY_NORMALIZE
-	double vol = pow( a_in, (double) dim_in );
+	t_real vol = pow( a_in, (t_real) dim_in );
 #else
-	double vol = 1.0;
+	t_real vol = 1.0;
 #endif
         for(i=0;i<dim_in;i++)
                 z += x_in[i] * x_in[i];
@@ -160,14 +160,14 @@ double cubic_window( int dim_in, double a_in, double *x_in )
  * @param x_in The position at which to evaluate the derivative
  * @return The scalar value of the derivative
  */
-double cubic_window_deriv( int dim_in, int drv_in, double a_in, double *x_in )
+t_real cubic_window_deriv( int dim_in, int drv_in, t_real a_in, t_real *x_in )
 {
 	int i,j;
-	double sum,prd,z = 0.0;
+	t_real sum,prd,z = 0.0;
 
 	/* Initialize polynomial coefficients correctly pre-scaled */
-	double cf1[4] = { 4.0 / 3.0, 2.0 * -2.0 / a_in, 4.0 * 1.0 / a_in / a_in, 8.0 * -1.0 / 6.0 / a_in / a_in / a_in };
-	double cf2[4] = { 2.0 / 3.0, 2.0 * 0.0 / a_in, 4.0 * -1.0 / a_in / a_in, 8.0 * 1.0 / 2.0 / a_in / a_in / a_in };
+	t_real cf1[4] = { 4.0 / 3.0, 2.0 * -2.0 / a_in, 4.0 * 1.0 / a_in / a_in, 8.0 * -1.0 / 6.0 / a_in / a_in / a_in };
+	t_real cf2[4] = { 2.0 / 3.0, 2.0 * 0.0 / a_in, 4.0 * -1.0 / a_in / a_in, 8.0 * 1.0 / 2.0 / a_in / a_in / a_in };
 
 	/* Calculate distance from zero */
 	for(i=0;i<dim_in;i++)
@@ -175,9 +175,9 @@ double cubic_window_deriv( int dim_in, int drv_in, double a_in, double *x_in )
         z = sqrt( z );
 
 #ifdef PUNITY_NORMALIZE
-	double vol = pow( a_in, (double) dim_in );
+	t_real vol = pow( a_in, (t_real) dim_in );
 #else
-	double vol = 1.0;
+	t_real vol = 1.0;
 #endif
 
 	/* Evaluate the drv_in derivative for each case */
@@ -187,12 +187,12 @@ double cubic_window_deriv( int dim_in, int drv_in, double a_in, double *x_in )
 	if( z / a_in > 0.5 )
 	{
 		/* Differentiate each term and evaluate at z */
-		for(i=0;i<4;i++) /* Variable i doubles as the order of the current term */
+		for(i=0;i<4;i++) /* Variable i t_reals as the order of the current term */
 		{
 			prd = cf1[i];
 			for(j=0;j<drv_in;j++)
-				prd *= (double) ( i - j );
-			prd *= pow( z, (double) ( i - drv_in ) );
+				prd *= (t_real) ( i - j );
+			prd *= pow( z, (t_real) ( i - drv_in ) );
 			sum += prd;
 		}
 		return sum / vol;
@@ -200,30 +200,30 @@ double cubic_window_deriv( int dim_in, int drv_in, double a_in, double *x_in )
 	if( z / a_in >= 0.0 )
 	{
 		/* Differentiate each term and evaluate at z */
-                for(i=0;i<4;i++) /* Variable i doubles as the order of the current term */
+                for(i=0;i<4;i++) /* Variable i t_reals as the order of the current term */
                 {
                         prd = cf2[i];
                         for(j=0;j<drv_in;j++)
-                                prd *= (double) ( i - j );
-                        prd *= pow( z, (double) ( i - drv_in ) );
+                                prd *= (t_real) ( i - j );
+                        prd *= pow( z, (t_real) ( i - drv_in ) );
                         sum += prd;
                 }
 		return sum / vol;
 	}
 }
 
-double quartic_window( int dim_in, double a_in, double *x_in )
+t_real quartic_window( int dim_in, t_real a_in, t_real *x_in )
 {
 	int i;
-	double z = 0.0;
+	t_real z = 0.0;
 	for(i=0;i<dim_in;i++)
 		z += x_in[i] * x_in[i];
 	z = sqrt( z ) / a_in;
 
 #ifdef PUNITY_NORMALIZE
-	double vol = pow( a_in, (double) dim_in );
+	t_real vol = pow( a_in, (t_real) dim_in );
 #else
-	double vol = 1.0;
+	t_real vol = 1.0;
 #endif
 
 	if( z > 1.0 )
@@ -232,7 +232,7 @@ double quartic_window( int dim_in, double a_in, double *x_in )
 		return ( 1.0 - 6.0 * z * z + 8.0 * z * z * z - 3.0 * z * z * z * z ) / vol;
 }
 
-double quartic_window_deriv( int dim_in, int drv_in, double a_in, double *x_in )
+t_real quartic_window_deriv( int dim_in, int drv_in, t_real a_in, t_real *x_in )
 {
 	int i;
 
@@ -247,10 +247,10 @@ double quartic_window_deriv( int dim_in, int drv_in, double a_in, double *x_in )
  * @param idx_in Window index
  * @param x_in Point at which to evaluate
  */
-double punity_window_evaluate( punity_t *obj_in, int idx_in, double *x_in )
+t_real punity_window_evaluate( punity_t *obj_in, int idx_in, t_real *x_in )
 {
 	int i;
-	double x[obj_in->dim];
+	t_real x[obj_in->dim];
 
 	for(i=0;i<obj_in->dim;i++)
 		x[i] = x_in[i] - obj_in->pts[idx_in*obj_in->dim+i];
@@ -267,16 +267,16 @@ double punity_window_evaluate( punity_t *obj_in, int idx_in, double *x_in )
  * @param x_in Point at which to evaluate
  * @param exp_in Exponent to define the singularity
  */
-double punity_window_evaluate_delta( punity_t *obj_in, int idx_in, double *x_in, int exp_in )
+t_real punity_window_evaluate_delta( punity_t *obj_in, int idx_in, t_real *x_in, int exp_in )
 {
 	int i;
-	double r = 0.0;
+	t_real r = 0.0;
 
 	for(i=0;i<obj_in->dim;i++)
 		r += pow( x_in[i] - obj_in->pts[idx_in*obj_in->dim+i], 2.0 );
 	r = sqrt( r );
 
-	return punity_window_evaluate( obj_in, idx_in, x_in ) / pow( r / obj_in->dlt[idx_in], (double) exp_in );
+	return punity_window_evaluate( obj_in, idx_in, x_in ) / pow( r / obj_in->dlt[idx_in], (t_real) exp_in );
 }
 
 /**
@@ -291,15 +291,15 @@ double punity_window_evaluate_delta( punity_t *obj_in, int idx_in, double *x_in,
  * @param wfsd_in Function returning specific derivatives of the window
  * @return Returns 0 if no error, -1 if memory issues
  */
-int punity_init( punity_t *obj_in, int dim_in, int npts_in, double *pts_in, double *dlt_in, double (*wfs_in)(int,double,double*), double (*wfsd_in)(int,int,double,double*) )
+int punity_init( punity_t *obj_in, int dim_in, int npts_in, t_real *pts_in, t_real *dlt_in, t_real (*wfs_in)(int,t_real,t_real*), t_real (*wfsd_in)(int,int,t_real,t_real*) )
 {
 	int i;
 
 	/* Set all the basic dimensional information */
 	obj_in->dim = dim_in;
 	obj_in->npts = npts_in;
-	obj_in->pts = (double*) malloc( dim_in * npts_in * sizeof(double) );
-	obj_in->dlt = (double*) malloc( npts_in * sizeof(double) );
+	obj_in->pts = (t_real*) malloc( dim_in * npts_in * sizeof(t_real) );
+	obj_in->dlt = (t_real*) malloc( npts_in * sizeof(t_real) );
 	if( obj_in->pts == NULL || obj_in->dlt == NULL )
 		return -1;
 
@@ -340,7 +340,7 @@ int punity_init( punity_t *obj_in, int dim_in, int npts_in, double *pts_in, doub
  * Turn on periodic boundaries and read the bounds
  * as input arguments given in rpb_in
  */
-int punity_use_pbc( punity_t *obj_in, double *rpb_in )
+int punity_use_pbc( punity_t *obj_in, t_real *rpb_in )
 {
     int i;
 
@@ -351,7 +351,7 @@ int punity_use_pbc( punity_t *obj_in, double *rpb_in )
     if( obj_in->rpb != NULL )
         return -1; /* Something funny is going on */
     else
-        obj_in->rpb = (double*) malloc( obj_in->dim * sizeof(double) );
+        obj_in->rpb = (t_real*) malloc( obj_in->dim * sizeof(t_real) );
 
     /* Set the actual boundaries for ea. dimension */
     for(i=0;i<obj_in->dim;i++)
@@ -387,10 +387,10 @@ int punity_free( punity_t *obj_in )
  * @param x_in Position at which to evaluate the function
  * @return Value of function idx_in at point x_in
  */
-double punity_evaluate( punity_t *obj_in, int idx_in, double *x_in )
+t_real punity_evaluate( punity_t *obj_in, int idx_in, t_real *x_in )
 {
 	int i,j;
-	double res,sum,vec[obj_in->dim];
+	t_real res,sum,vec[obj_in->dim];
 
 	/* If an index is given outside the range of number of points then return zero */
 	if( idx_in > obj_in->npts - 1 )
@@ -462,10 +462,10 @@ double punity_evaluate( punity_t *obj_in, int idx_in, double *x_in )
  * @param x_in Point at which to evaluate the functions
  * @param exp_in Exponent to use for singularity evaluation
  */
-double punity_evaluate_delta( punity_t *obj_in, int idx_in, double *x_in, int exp_in )
+t_real punity_evaluate_delta( punity_t *obj_in, int idx_in, t_real *x_in, int exp_in )
 {
 	int i,j;
-	double res,sum,vec[obj_in->dim];
+	t_real res,sum,vec[obj_in->dim];
 
 	/* If an index is given outside the range of number of points then return zero */
 	if( idx_in > obj_in->npts - 1 )
@@ -491,7 +491,7 @@ double punity_evaluate_delta( punity_t *obj_in, int idx_in, double *x_in, int ex
 			if( obj_in->bdry[i] == 0 )
 				sum += obj_in->wfs( obj_in->dim, obj_in->dlt[i], vec );
 			else
-				sum += obj_in->wfs( obj_in->dim, obj_in->dlt[i], vec ) / pow( res / obj_in->dlt[i], (double) exp_in );
+				sum += obj_in->wfs( obj_in->dim, obj_in->dlt[i], vec ) / pow( res / obj_in->dlt[i], (t_real) exp_in );
 		}
 	}
 	res = 0.0;
@@ -505,7 +505,7 @@ double punity_evaluate_delta( punity_t *obj_in, int idx_in, double *x_in, int ex
 		if( obj_in->bdry[idx_in] == 0 )
 			return obj_in->wfs( obj_in->dim, obj_in->dlt[idx_in], vec ) / sum;
 		else
-			return obj_in->wfs( obj_in->dim, obj_in->dlt[idx_in], vec ) / pow( res / obj_in->dlt[idx_in], (double) exp_in ) / sum;
+			return obj_in->wfs( obj_in->dim, obj_in->dlt[idx_in], vec ) / pow( res / obj_in->dlt[idx_in], (t_real) exp_in ) / sum;
 	}
 }
 
@@ -516,10 +516,10 @@ double punity_evaluate_delta( punity_t *obj_in, int idx_in, double *x_in, int ex
  * @param drv_in Derivative integer vector
  * @param x_in Point at which to evaluate the derivative
  */
-double radial_deriv_evaluate( int dim_in, int *drv_in, double *x_in )
+t_real radial_deriv_evaluate( int dim_in, int *drv_in, t_real *x_in )
 {
 	int b,c,i,j,p,n,*v,*w,*s,*m;
-	double d,prd,sum = 0.0;
+	t_real d,prd,sum = 0.0;
 
 	/* Set up the vector to partition */
 	n = 0;
@@ -579,11 +579,11 @@ double radial_deriv_evaluate( int dim_in, int *drv_in, double *x_in )
 
 		/* Calculate b derivative of radial function */
 		for(i=0;i<b;i++)
-			prd *= ( 0.5 - (double) i );
+			prd *= ( 0.5 - (t_real) i );
 		d = 0.0;
 		for(i=0;i<dim_in;i++)
 			d += x_in[i] * x_in[i];
-		prd *= pow( d, 0.5 - (double) b );
+		prd *= pow( d, 0.5 - (t_real) b );
 		sum += prd;
 	}
 	while( partition_next( s, m, n ) != 0 );
@@ -605,10 +605,10 @@ double radial_deriv_evaluate( int dim_in, int *drv_in, double *x_in )
  * @param a_in Dilation factor to use; r -> (r/a)**-p
  * @param exp_in Exponent p to use
  */
-double rational_radial_deriv_evaluate( int dim_in, int *drv_in, double *x_in, double a_in, int exp_in )
+t_real rational_radial_deriv_evaluate( int dim_in, int *drv_in, t_real *x_in, t_real a_in, int exp_in )
 {
 	int b,c,i,j,k,p,n,*v,*w,*s,*m,*q;
-	double d,y,prd,sum = 0.0;
+	t_real d,y,prd,sum = 0.0;
 
 	/* Set up the vector to partition */
 	n = 0;
@@ -637,7 +637,7 @@ double rational_radial_deriv_evaluate( int dim_in, int *drv_in, double *x_in, do
 		free( s );
 		free( m );
 		free( q );
-		return pow( d / a_in, (double) ( -exp_in ) );
+		return pow( d / a_in, (t_real) ( -exp_in ) );
 	}
 
 	/* Start iterating through the partitions */
@@ -652,8 +652,8 @@ double rational_radial_deriv_evaluate( int dim_in, int *drv_in, double *x_in, do
 		/* Take the b-th derivative of r**-p w.r.t. r because b is the number of blocks in partition s */
 		prd = 1.0;
 		for(i=0;i<b;i++)
-			prd *= (double) ( -exp_in - i );
-		prd *= pow( d, (double) ( -exp_in - b ) );
+			prd *= (t_real) ( -exp_in - i );
+		prd *= pow( d, (t_real) ( -exp_in - b ) );
 
 		/* Now deal with all the other block derivatives of r w.r.t. x's */
 		for(i=0;i<b;i++)
@@ -681,17 +681,17 @@ double rational_radial_deriv_evaluate( int dim_in, int *drv_in, double *x_in, do
 	free( m );
 	free( q );
 
-	return pow( a_in, (double) exp_in ) * sum;
+	return pow( a_in, (t_real) exp_in ) * sum;
 }
 
 /**
  * Evaluate the derivative of phi_i / ( sum_j phi_j ) w.r.t. the phi_j's themselves
  * where each phi_j is evaluated at the input point x_in
  */
-double punity_comp_deriv_evaluate( punity_t *obj_in, int idx_in, int *drv_in, int q_in, int *nb_in, double *x_in )
+t_real punity_comp_deriv_evaluate( punity_t *obj_in, int idx_in, int *drv_in, int q_in, int *nb_in, t_real *x_in )
 {
 	int i,j,k,n;
-	double sum,prd1,prd2;
+	t_real sum,prd1,prd2;
 
 	/* Build the rank of the derivative w.r.t. all variables not equal to idx_in */
 	n = 0;
@@ -712,14 +712,14 @@ double punity_comp_deriv_evaluate( punity_t *obj_in, int idx_in, int *drv_in, in
 
 	/* Simplified derivative only has two terms! */
 	prd1 = punity_window_evaluate( obj_in, idx_in, x_in ) * ( n % 2 == 0 ? 1.0 : -1.0 )
-		* (double) factorial( n ) * pow( sum, -1.0 * (double) ( n + 1 ) );
+		* (t_real) factorial( n ) * pow( sum, -1.0 * (t_real) ( n + 1 ) );
 
 	/* If drv_in[k] == 0 then return prd1 as output */
 	if( drv_in[k] == 0 )
 		return prd1;
 
 	/* Build the second term in the sum */
-	prd2 = (double) drv_in[k] * ( ( n - 1 ) % 2 == 0 ? 1.0 : -1.0 ) * (double) factorial( n - 1 ) * pow( sum, -1.0 * (double) n );
+	prd2 = (t_real) drv_in[k] * ( ( n - 1 ) % 2 == 0 ? 1.0 : -1.0 ) * (t_real) factorial( n - 1 ) * pow( sum, -1.0 * (t_real) n );
 
 	/* Form sum */
 	return prd1 + prd2;
@@ -730,10 +730,10 @@ double punity_comp_deriv_evaluate( punity_t *obj_in, int idx_in, int *drv_in, in
  * of a composition of an r-dependent function with r as a function of
  * the individual x variables; r = sqrt( x1^2 + ... + xd^2 )
  */
-double punity_window_deriv_evaluate( punity_t *obj_in, int idx_in, int *drv_in, double *x_in )
+t_real punity_window_deriv_evaluate( punity_t *obj_in, int idx_in, int *drv_in, t_real *x_in )
 {
 	int b,c,i,j,p,n,*v,*w,*s,*m,*t;
-        double d,prd,sum = 0.0;
+        t_real d,prd,sum = 0.0;
 
 	/* Set up the vector to partition */
         n = 0;
@@ -811,10 +811,10 @@ double punity_window_deriv_evaluate( punity_t *obj_in, int idx_in, int *drv_in, 
  * Evaluate arbitrary derivatives of partition of unity functions with
  * a singularity of order exp_in at the origin of the function
  */
-double punity_window_deriv_evaluate_delta( punity_t *obj_in, int idx_in, int *drv_in, double *x_in, int exp_in )
+t_real punity_window_deriv_evaluate_delta( punity_t *obj_in, int idx_in, int *drv_in, t_real *x_in, int exp_in )
 {
 	int i,j,k,m,n,p,q,r,*qc,*qd,*v,*cmb,*dmb;
-	double d,prd,sum = 0.0;
+	t_real d,prd,sum = 0.0;
 
 	/* Do some setup */
 	n = 0;
@@ -845,7 +845,7 @@ double punity_window_deriv_evaluate_delta( punity_t *obj_in, int idx_in, int *dr
 		free( qd );
 		free( cmb );
 		free( dmb );
-		return obj_in->wfs( obj_in->dim, obj_in->dlt[idx_in], x_in ) / pow( d / obj_in->dlt[idx_in], (double) exp_in );
+		return obj_in->wfs( obj_in->dim, obj_in->dlt[idx_in], x_in ) / pow( d / obj_in->dlt[idx_in], (t_real) exp_in );
 	}
 
 	/* Iterate through all combinations sizes and for each size, iterate through all combinations */
@@ -885,7 +885,7 @@ double punity_window_deriv_evaluate_delta( punity_t *obj_in, int idx_in, int *dr
 			/* Apply the derivative to the window function and evaluate it */
 			prd = 1.0;
 			if( i == 0 )
-				prd *= pow( d, (double) ( -exp_in ) );
+				prd *= pow( d, (t_real) ( -exp_in ) );
 			else
 				prd *= rational_radial_deriv_evaluate( obj_in->dim, qc, x_in, obj_in->dlt[idx_in], exp_in );
 			if( n - i == 0 )
@@ -910,10 +910,10 @@ double punity_window_deriv_evaluate_delta( punity_t *obj_in, int idx_in, int *dr
 	return sum;
 }
 
-int punity_neighbors( punity_t *obj_in, double *x_in, int **nb_out )
+int punity_neighbors( punity_t *obj_in, t_real *x_in, int **nb_out )
 {
 	int i,j,q,na,*nb;
-	double prd;
+	t_real prd;
 
 	na = PUNITY_NB_INCREMENT;
         nb = (int*) malloc( na * sizeof(int) );
@@ -945,11 +945,11 @@ int punity_neighbors( punity_t *obj_in, double *x_in, int **nb_out )
  * @param x_in Point to query
  * @param nb_out Output neighbors; allocated on-the-fly; you need to clean this up
  */
-int punity_neighbors_fast( punity_t *obj_in, double *x_in, int **nb_out )
+int punity_neighbors_fast( punity_t *obj_in, t_real *x_in, int **nb_out )
 {
 	int i,j,n,a,nn,aa,*id;
-	double sum;
-	const double rsq = obj_in->rmax * obj_in->rmax;
+	t_real sum;
+	const t_real rsq = obj_in->rmax * obj_in->rmax;
 
 	id = NULL, n = 0, a = 0;
 	kdtree_range_query( obj_in->kdt, x_in, obj_in->rmax, &id, &a, &n );
@@ -983,11 +983,11 @@ int punity_neighbors_fast( punity_t *obj_in, double *x_in, int **nb_out )
  * @param nb_in Neighbors of point idx_in; if NULL it will be calculated
  * @return The value of the derivative at point x_in
  */
-double punity_term_deriv_evaluate( punity_t *obj_in, int idx_in, int *drv_in, double *x_in, int *nb_in, int q_in )
+t_real punity_term_deriv_evaluate( punity_t *obj_in, int idx_in, int *drv_in, t_real *x_in, int *nb_in, int q_in )
 {
 	int b,c,i,j,k,p,q,n,bf,*v,*w,*s,*m,*t,*u,*nb;
 	long *size,*index;
-        double d,prd,tsum,*y,sum = 0.0;
+        t_real d,prd,tsum,*y,sum = 0.0;
 
 	/* First check to see if x_in is too far from obj_in->pts + idx_in * dim */
 	prd = 0.0;
@@ -998,7 +998,7 @@ double punity_term_deriv_evaluate( punity_t *obj_in, int idx_in, int *drv_in, do
 		return 0.0;
 
 	/* Temporary position vector for translation */
-	y = (double*) malloc( obj_in->dim * sizeof(double) );
+	y = (t_real*) malloc( obj_in->dim * sizeof(t_real) );
 
 	/* Set up the vector to partition */
         n = 0;
@@ -1111,11 +1111,11 @@ double punity_term_deriv_evaluate( punity_t *obj_in, int idx_in, int *drv_in, do
  * @param nb_in Neighbors given as input; NULL means calculate it yourself
  * @return The value of the derivative at point x_in
  */
-double punity_term_deriv_evaluate_delta( punity_t *obj_in, int idx_in, int *drv_in, double *x_in, int exp_in, int *nb_in, int q_in )
+t_real punity_term_deriv_evaluate_delta( punity_t *obj_in, int idx_in, int *drv_in, t_real *x_in, int exp_in, int *nb_in, int q_in )
 {
 	int b,c,i,j,k,p,q,n,bf,*v,*w,*s,*m,*t,*u,*nb;
 	long *size,*index;
-        double d,prd,tsum,*y,sum = 0.0;
+        t_real d,prd,tsum,*y,sum = 0.0;
 
 	/* First check to see if x_in is too far from obj_in->pts + idx_in * dim */
 	prd = 0.0;
@@ -1126,7 +1126,7 @@ double punity_term_deriv_evaluate_delta( punity_t *obj_in, int idx_in, int *drv_
 		return 0.0;
 
 	/* Temporary position vector for translation */
-	y = (double*) malloc( obj_in->dim * sizeof(double) );
+	y = (t_real*) malloc( obj_in->dim * sizeof(t_real) );
 
 	/* Set up the vector to partition */
         n = 0;
@@ -1236,7 +1236,7 @@ double punity_term_deriv_evaluate_delta( punity_t *obj_in, int idx_in, int *drv_
  * This function is intended to be a faster version of punity_term_deriv_evaluate
  * for use calculating the first derivatives only
  */
-double punity_term_first_deriv_evaluate( punity_t *obj_in, int idx_in, int drv_in, double *x_in )
+t_real punity_term_first_deriv_evaluate( punity_t *obj_in, int idx_in, int drv_in, t_real *x_in )
 {
 	
 }
@@ -1244,14 +1244,14 @@ double punity_term_first_deriv_evaluate( punity_t *obj_in, int idx_in, int drv_i
 /**
  * Evaluate particle-localized polynomial term
  */
-double punity_eval_local_poly( punity_t *obj_in, int idx_in, int *pidx_in, double *x_in )
+t_real punity_eval_local_poly( punity_t *obj_in, int idx_in, int *pidx_in, t_real *x_in )
 {
 	int i;
-	double prd = 1.0;
+	t_real prd = 1.0;
 
 	/* Calculate the monomial term evaluated at x_in */
 	for(i=0;i<obj_in->dim;i++) /* Evaluate everything on the local scale as well */
-		prd *= pow( ( x_in[i] - obj_in->pts[idx_in*obj_in->dim+i] ) / obj_in->dlt[idx_in], (double) pidx_in[i] );
+		prd *= pow( ( x_in[i] - obj_in->pts[idx_in*obj_in->dim+i] ) / obj_in->dlt[idx_in], (t_real) pidx_in[i] );
 
 	return prd * punity_evaluate( obj_in, idx_in, x_in );
 }
@@ -1260,14 +1260,14 @@ double punity_eval_local_poly( punity_t *obj_in, int idx_in, int *pidx_in, doubl
  * Evaluate particle-localizaed polynomial term while observing
  * singular particle terms
  */
-double punity_eval_local_poly_delta( punity_t *obj_in, int idx_in, int *pidx_in, double *x_in, int exp_in )
+t_real punity_eval_local_poly_delta( punity_t *obj_in, int idx_in, int *pidx_in, t_real *x_in, int exp_in )
 {
 	int i;
-	double prd = 1.0;
+	t_real prd = 1.0;
 
 	/* Calculate the monomial term evaluated at x_in */
 	for(i=0;i<obj_in->dim;i++)
-		prd *= pow( ( x_in[i] - obj_in->pts[idx_in*obj_in->dim+i] ) / obj_in->dlt[idx_in], (double) pidx_in[i] );
+		prd *= pow( ( x_in[i] - obj_in->pts[idx_in*obj_in->dim+i] ) / obj_in->dlt[idx_in], (t_real) pidx_in[i] );
 
 	return prd * punity_evaluate_delta( obj_in, idx_in, x_in, exp_in );
 }
@@ -1276,10 +1276,10 @@ double punity_eval_local_poly_delta( punity_t *obj_in, int idx_in, int *pidx_in,
  * Evaluate derivatives of the particle-localized polynomial term
  * while ignoring singular particles
  */
-double punity_term_deriv_local_poly( punity_t * obj_in, int idx_in, int *pidx_in, int *drv_in, double *x_in, int *nb_in, int q_in )
+t_real punity_term_deriv_local_poly( punity_t * obj_in, int idx_in, int *pidx_in, int *drv_in, t_real *x_in, int *nb_in, int q_in )
 {
 	int i,j,k,m,n,p,q,r,*qc,*qd,*v,*cmb,*dmb;
-	double prd,coeff,sum = 0.0;
+	t_real prd,coeff,sum = 0.0;
 
 	/* Do some setup */
 	n = 0;
@@ -1347,7 +1347,7 @@ double punity_term_deriv_local_poly( punity_t * obj_in, int idx_in, int *pidx_in
 			{
 				/* Put the value of the polynomial term in pidx_in in prd */
 				for(m=0;m<obj_in->dim;m++)
-					prd *= pow( ( x_in[m] - obj_in->pts[idx_in*obj_in->dim+m] ) / obj_in->dlt[idx_in], (double) pidx_in[m] );
+					prd *= pow( ( x_in[m] - obj_in->pts[idx_in*obj_in->dim+m] ) / obj_in->dlt[idx_in], (t_real) pidx_in[m] );
 			}
 			else
 			{
@@ -1362,9 +1362,9 @@ double punity_term_deriv_local_poly( punity_t * obj_in, int idx_in, int *pidx_in
 					}
 					else
 					{
-						prd *= pow( x_in[m] - obj_in->pts[idx_in*obj_in->dim+m], (double) p ) / pow( obj_in->dlt[idx_in], (double) pidx_in[m] );
+						prd *= pow( x_in[m] - obj_in->pts[idx_in*obj_in->dim+m], (t_real) p ) / pow( obj_in->dlt[idx_in], (t_real) pidx_in[m] );
 						for(p=0;p<qc[m];p++)
-							prd *= (double) ( pidx_in[m] - p );
+							prd *= (t_real) ( pidx_in[m] - p );
 					}
 				}
 			}
@@ -1394,10 +1394,10 @@ double punity_term_deriv_local_poly( punity_t * obj_in, int idx_in, int *pidx_in
  * Evaluate derivatives of the particle-localized polynomial term
  * while ignoring singular particles
  */
-double punity_term_deriv_local_poly_delta( punity_t * obj_in, int idx_in, int *pidx_in, int *drv_in, double *x_in, int exp_in, int *nb_in, int q_in )
+t_real punity_term_deriv_local_poly_delta( punity_t * obj_in, int idx_in, int *pidx_in, int *drv_in, t_real *x_in, int exp_in, int *nb_in, int q_in )
 {
 	int i,j,k,m,n,p,q,r,*qc,*qd,*v,*cmb,*dmb;
-	double prd,coeff,sum = 0.0;
+	t_real prd,coeff,sum = 0.0;
 
 	/* Do some setup */
 	n = 0;
@@ -1465,7 +1465,7 @@ double punity_term_deriv_local_poly_delta( punity_t * obj_in, int idx_in, int *p
 			{
 				/* Put the value of the polynomial term in pidx_in in prd */
 				for(m=0;m<obj_in->dim;m++)
-					prd *= pow( ( x_in[m] - obj_in->pts[idx_in*obj_in->dim+m] ) / obj_in->dlt[idx_in], (double) pidx_in[m] );
+					prd *= pow( ( x_in[m] - obj_in->pts[idx_in*obj_in->dim+m] ) / obj_in->dlt[idx_in], (t_real) pidx_in[m] );
 
 			}
 			else
@@ -1481,9 +1481,9 @@ double punity_term_deriv_local_poly_delta( punity_t * obj_in, int idx_in, int *p
 					}
 					else
 					{
-						prd *= pow( x_in[m] - obj_in->pts[idx_in*obj_in->dim+m], (double) p ) / pow( obj_in->dlt[idx_in], (double) pidx_in[m] );
+						prd *= pow( x_in[m] - obj_in->pts[idx_in*obj_in->dim+m], (t_real) p ) / pow( obj_in->dlt[idx_in], (t_real) pidx_in[m] );
 						for(p=0;p<qc[m];p++)
-							prd *= (double) ( pidx_in[m] - p );
+							prd *= (t_real) ( pidx_in[m] - p );
 					}
 				}
 			}
@@ -1513,10 +1513,10 @@ double punity_term_deriv_local_poly_delta( punity_t * obj_in, int idx_in, int *p
  * A version of punity_window_deriv_evaluate allowing arbitrary specification
  * of the radial derivative function
  */
-double radial_window_deriv_evaluate( int dim_in, double (*wfsd_in)(int,int,double,double*), double dlt_in, int *drv_in, double *x_in )
+t_real radial_window_deriv_evaluate( int dim_in, t_real (*wfsd_in)(int,int,t_real,t_real*), t_real dlt_in, int *drv_in, t_real *x_in )
 {
 	int b,c,i,j,p,n,*v,*w,*s,*m,*t;
-        double d,prd,sum = 0.0;
+        t_real d,prd,sum = 0.0;
 
 	/* Set up the vector to partition */
         n = 0;
@@ -1594,10 +1594,10 @@ double radial_window_deriv_evaluate( int dim_in, double (*wfsd_in)(int,int,doubl
  * Generalized version of punity_window_deriv_evaluate_delta but with given
  * function pointer
  */
-double radial_window_deriv_evaluate_delta( int dim_in, double (*wfsd_in)(int,int,double,double*), double dlt_in, int *drv_in, double *x_in, int exp_in )
+t_real radial_window_deriv_evaluate_delta( int dim_in, t_real (*wfsd_in)(int,int,t_real,t_real*), t_real dlt_in, int *drv_in, t_real *x_in, int exp_in )
 {
 	int i,j,k,m,n,p,q,r,*qc,*qd,*v,*cmb,*dmb;
-	double d,prd,sum = 0.0;
+	t_real d,prd,sum = 0.0;
 
 	/* Do some setup */
 	n = 0;
@@ -1628,7 +1628,7 @@ double radial_window_deriv_evaluate_delta( int dim_in, double (*wfsd_in)(int,int
 		free( qd );
 		free( cmb );
 		free( dmb );
-		return wfsd_in( dim_in, 0, dlt_in, x_in ) / pow( d / dlt_in, (double) exp_in );
+		return wfsd_in( dim_in, 0, dlt_in, x_in ) / pow( d / dlt_in, (t_real) exp_in );
 	}
 
 	/* Iterate through all combinations sizes and for each size, iterate through all combinations */
@@ -1668,7 +1668,7 @@ double radial_window_deriv_evaluate_delta( int dim_in, double (*wfsd_in)(int,int
 			/* Apply the derivative to the window function and evaluate it */
 			prd = 1.0;
 			if( i == 0 )
-				prd *= pow( d, (double) ( -exp_in ) );
+				prd *= pow( d, (t_real) ( -exp_in ) );
 			else
 				prd *= rational_radial_deriv_evaluate( dim_in, qc, x_in, dlt_in, exp_in );
 			if( n - i == 0 )
@@ -1699,10 +1699,10 @@ double radial_window_deriv_evaluate_delta( int dim_in, double (*wfsd_in)(int,int
  * radial because radial functions are simple, so can calculate any
  * derivative
  */
-double punity_term_deriv_local_radial( punity_t * obj_in, int idx_in, double (*wfsd_in)(int,int,double,double*), int *drv_in, double *x_in, int *nb_in, int q_in )
+t_real punity_term_deriv_local_radial( punity_t * obj_in, int idx_in, t_real (*wfsd_in)(int,int,t_real,t_real*), int *drv_in, t_real *x_in, int *nb_in, int q_in )
 {
 	int i,j,k,m,n,p,q,r,*qc,*qd,*v,*cmb,*dmb;
-	double d,prd,*y,sum = 0.0;
+	t_real d,prd,*y,sum = 0.0;
 
 	/* Do some setup */
 	n = 0;
@@ -1715,7 +1715,7 @@ double punity_term_deriv_local_radial( punity_t * obj_in, int idx_in, double (*w
 	qd = (int*) malloc( obj_in->dim * sizeof(int) ); /* Complement of q w.r.t. the current cmb state */
 	cmb = (int*) malloc( n * sizeof(int) );
 	dmb = (int*) malloc( n * sizeof(int) );
-	y = (double*) malloc( obj_in->dim * sizeof(double) );
+	y = (t_real*) malloc( obj_in->dim * sizeof(t_real) );
 
 	/* Form y = x - x_i */
 	for(i=0;i<obj_in->dim;i++)
@@ -1806,7 +1806,7 @@ double punity_term_deriv_local_radial( punity_t * obj_in, int idx_in, double (*w
  * Same as punity_term_deriv_local_radial() except use singular particles
  * where applicable
  */
-double punity_term_deriv_local_radial_delta( punity_t * obj_in, int idx_in, double (*rfd_in)(int,double), int *drv_in, double *x_in, int exp_in, int *nb_in, int q_in )
+t_real punity_term_deriv_local_radial_delta( punity_t * obj_in, int idx_in, t_real (*rfd_in)(int,t_real), int *drv_in, t_real *x_in, int exp_in, int *nb_in, int q_in )
 {
 	
 }
@@ -1814,7 +1814,7 @@ double punity_term_deriv_local_radial_delta( punity_t * obj_in, int idx_in, doub
 /**
  * Partition of unity basis initializer
  */
-int pubasis_init( pubasis_t *obj_in, int dim_in, int npts_in, double *pts_in, double *dlt_in, int *nlbase_in, int **lbase_in, double (*wfs_in)(int,double,double*), double (*wfsd_in)(int,int,double,double*), int nextf_in, double (**extf)(int,double,double*) )
+int pubasis_init( pubasis_t *obj_in, int dim_in, int npts_in, t_real *pts_in, t_real *dlt_in, int *nlbase_in, int **lbase_in, t_real (*wfs_in)(int,t_real,t_real*), t_real (*wfsd_in)(int,int,t_real,t_real*), int nextf_in, t_real (**extf)(int,t_real,t_real*) )
 {
 	int i,j;
 

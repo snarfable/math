@@ -29,5 +29,7 @@ int generate_nucleus_cloud( int, int, double *, int, double **, double, int );
 
 double singular_wavefunction( int, double * );
 
+void nuclei_print( nuclei_t * );
+
 #endif
 

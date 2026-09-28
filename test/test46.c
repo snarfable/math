@@ -19,6 +19,7 @@
 #include "trees.h"
 #include "parse.h"
 #include "cfgread.h"
+#include "test/mbuild.h"
 
 /* Includes for specific tasks for this template */
 #include "points.h"

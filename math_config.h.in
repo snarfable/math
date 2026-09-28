@@ -7,3 +7,5 @@
 #else
 #define USE_GMXLIB_LEGACY
 #endif
+
+#cmakedefine HAVE_DOUBLE

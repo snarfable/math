@@ -10,6 +10,8 @@ set(FC gfortran)
 set(GROMACS_VERSION "2018")
 set(CMAKE_Fortran_SOURCE_FILE_EXTENSIONS f90)
 
+option(HAVE_DOUBLE ON)
+
 add_library(mathext linalg.f90 runge.f90 anint.f90)
 add_library(math lagrange.c quadrature.c nurbs.c legendre.c mls.c cgrad.c mqrbf.c points.c nuclei.c sparse.c punity.c pbc.c anint.f90 combinadic.c parse.c trees.c symtab.c cfgread.c)
 target_link_libraries(math gromacs mathext)

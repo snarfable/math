@@ -4,6 +4,9 @@
 #include "points.h"
 #include "punity.h"
 #include "nuclei.h"
+#include "combinadic.h"
+#include "parse.h"
+#include "trees.h"
 
 /**
  * Generate the overlap and Hamiltonian matrices using the given PU

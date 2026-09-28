@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <strings.h>
+#include "linalg.h"
+#include "combinadic.h"
 #include <math.h>
 #include "math_config.h"
 

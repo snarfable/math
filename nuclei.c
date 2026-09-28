@@ -3,26 +3,28 @@
 #include <math.h>
 #include <time.h>
 #include "parse.h"
+#include "points.h"
 #include "math_config.h"
+#include "conf.h"
 
 typedef struct
 {
 	int dim;
 	int np;
-	double *pts;
-	double *dlt;
-	double *params;
-	double *chg;
+	t_real *pts;
+	t_real *dlt;
+	t_real *params;
+	t_real *chg;
 } nuclei_t;
 
 int nuclei_init( nuclei_t *obj_in, int dim_in, int np_in )
 {
 	obj_in->dim = dim_in;
 	obj_in->np = np_in;
-	obj_in->pts = (double*) malloc( np_in * dim_in * sizeof(double) );
-	obj_in->dlt = (double*) malloc( np_in * sizeof(double) );
-	obj_in->params = (double*) malloc( 2 * np_in * sizeof(double) );
-	obj_in->chg = (double*) malloc( np_in * sizeof(double) );
+	obj_in->pts = (t_real*) malloc( np_in * dim_in * sizeof(t_real) );
+	obj_in->dlt = (t_real*) malloc( np_in * sizeof(t_real) );
+	obj_in->params = (t_real*) malloc( 2 * np_in * sizeof(t_real) );
+	obj_in->chg = (t_real*) malloc( np_in * sizeof(t_real) );
 
 	return 0;
 }
@@ -51,10 +53,10 @@ void nuclei_print( nuclei_t *obj_in )
 	}
 }
 
-double gaussian( int dim_in, double std_in, double *ctr_in, double *x_in )
+t_real gaussian( int dim_in, t_real std_in, t_real *ctr_in, t_real *x_in )
 {
 	int i;
-	double sum = 0.0;
+	t_real sum = 0.0;
 	for(i=0;i<dim_in;i++)
 		sum += pow( x_in[i] - ctr_in[i], 2.0 );
 	return exp( -1.0 * sum / std_in / std_in );
@@ -77,10 +79,10 @@ int load_nuclei( char *fn_in, nuclei_t *nuc_in, int fmt_in )
         return -1;
     nuc_in->dim = atoi( tok[0] );
     nuc_in->np = atoi( tok[1] );
-    nuc_in->pts = (double*) malloc( nuc_in->dim * nuc_in->np * sizeof(double) );
-    nuc_in->dlt = (double*) malloc( nuc_in->np * sizeof(double) );
-    nuc_in->params = (double*) malloc( 2 * nuc_in->np * sizeof(double) );
-    nuc_in->chg = (double*) malloc( nuc_in->np * sizeof(double) );
+    nuc_in->pts = (t_real*) malloc( nuc_in->dim * nuc_in->np * sizeof(t_real) );
+    nuc_in->dlt = (t_real*) malloc( nuc_in->np * sizeof(t_real) );
+    nuc_in->params = (t_real*) malloc( 2 * nuc_in->np * sizeof(t_real) );
+    nuc_in->chg = (t_real*) malloc( nuc_in->np * sizeof(t_real) );
     if( nuc_in->pts == NULL )
         return -1;
     for(i=0;i<nuc_in->np;i++)
@@ -106,10 +108,10 @@ int load_nuclei( char *fn_in, nuclei_t *nuc_in, int fmt_in )
  * Calculate the potential of an electron at x_in interacting with
  * all nuclei; FIXME: Need to implement charge parameters
  */
-double nuclei_potential( nuclei_t *obj_in, double *x_in )
+t_real nuclei_potential( nuclei_t *obj_in, t_real *x_in )
 {
 	int i,j;
-	double r,sum;
+	t_real r,sum;
 
 	sum = 0.0; /* Don't forget this dumbass */
 	for(i=0;i<obj_in->np;i++)
@@ -127,11 +129,11 @@ double nuclei_potential( nuclei_t *obj_in, double *x_in )
  * This builds a distribution function which is unity
  * at the given locations of nuclei
  */
-double nucleus_potential( nuclei_t *obj_in, double *x_in )
+t_real nucleus_potential( nuclei_t *obj_in, t_real *x_in )
 {
 	int i,j,idx;
-	double sum = 0.0;
-	double min;
+	t_real sum = 0.0;
+	t_real min;
 
 	for(i=0;i<obj_in->np;i++)
 	{
@@ -151,12 +153,12 @@ double nucleus_potential( nuclei_t *obj_in, double *x_in )
  * specifically the distance is the van der Waals distance to use
  * at the point x_in
  */
-double nucleus_length( nuclei_t *obj_in, double *x_in )
+t_real nucleus_length( nuclei_t *obj_in, t_real *x_in )
 { 
         int i,j,idx;
-        double sum = 0.0;
-        double min;
-		double scl, ncl;
+        t_real sum = 0.0;
+        t_real min;
+		t_real scl, ncl;
 
 		for(i=0;i<obj_in->np;i++)
         {
@@ -182,13 +184,13 @@ double nucleus_length( nuclei_t *obj_in, double *x_in )
  * @param pts_out The actual points generated as output
  * @return Returns 0 if success, otherwise an error
  */
-int generate_nucleus_cloud( int dim_in, int nnuc_in, double *nuc_in, int nppn_in, double **pts_out, double step_in, int max_in )
+int generate_nucleus_cloud( int dim_in, int nnuc_in, t_real *nuc_in, int nppn_in, t_real **pts_out, t_real step_in, int max_in )
 {
 	int i,j,k,m;
-	double sum,vec[dim_in];
+	t_real sum,vec[dim_in];
 
 	/* Initialize all points to an assigned center */
-	double *pts = (double*) malloc( nnuc_in * nppn_in * dim_in * sizeof(double) );
+	t_real *pts = (t_real*) malloc( nnuc_in * nppn_in * dim_in * sizeof(t_real) );
 	for(i=0;i<nnuc_in;i++)
 		for(j=0;j<nppn_in;j++)
 			for(k=0;k<dim_in;k++)
@@ -204,7 +206,7 @@ int generate_nucleus_cloud( int dim_in, int nnuc_in, double *nuc_in, int nppn_in
 			{
 				/* First generate a random direction */
 				for(m=0;m<dim_in;m++)
-					vec[m] = ( rand() > RAND_MAX / 2 ? 1.0 : -1.0 ) * (double) rand() / (double) RAND_MAX;
+					vec[m] = ( rand() > RAND_MAX / 2 ? 1.0 : -1.0 ) * (t_real) rand() / (t_real) RAND_MAX;
 				sum = 0.0;
 				for(m=0;m<dim_in;m++)
 					sum += vec[m] * vec[m];
@@ -223,7 +225,7 @@ int generate_nucleus_cloud( int dim_in, int nnuc_in, double *nuc_in, int nppn_in
 	return 0;
 }
 
-int smooth_nucleus_cloud( int dim_in, int np_in, double *pts_in )
+int smooth_nucleus_cloud( int dim_in, int np_in, t_real *pts_in )
 {
 	
 }
@@ -233,10 +235,10 @@ int smooth_nucleus_cloud( int dim_in, int np_in, double *pts_in )
  * to approximate electron density near a zero-angular-momentum nuclear
  * singularity
  */
-double singular_wavefunction( int dim_in, double *x_in )
+t_real singular_wavefunction( int dim_in, t_real *x_in )
 {
 	int i;
-	double sum = 0.0;
+	t_real sum = 0.0;
 
 	for(i=0;i<dim_in;i++)
 		sum += x_in[i] * x_in[i];

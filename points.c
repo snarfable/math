@@ -4,6 +4,8 @@
 #include <math.h>
 #include <time.h>
 #include "trees.h"
+#include "cfgread.h"
+#include "parse.h"
 #include "math_config.h"
 
 #define ZERO_THRESHOLD 1e-6

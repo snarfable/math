@@ -6,39 +6,42 @@
 #define DOMAIN_SPHERE 2
 #define DOMAIN_ELLIPSOID 3
 
+#include "math_config.h"
+#include "conf.h"
+
 typedef struct
 {
 	int dim;
 	int type;
-	double *orig;
-	double *params;
+	t_real *orig;
+	t_real *params;
 } shape_t;
 
-void point_print( FILE *, int, double * );
+void point_print( FILE *, int, t_real * );
 
-void domain_indicator( double *, shape_t *, int * );
+void domain_indicator( t_real *, shape_t *, int * );
 
-int sphere_intersection( int, double *, double, double *, double, double *, double *, double * );
+int sphere_intersection( int, t_real *, t_real, t_real *, t_real, t_real *, t_real *, t_real * );
 
-void lens_gauss_point( int, double *, double, double *, double, double , double *, long *, double *, double *, double *, double * );
+void lens_gauss_point( int, t_real *, t_real, t_real *, t_real, t_real , t_real *, long *, t_real *, t_real *, t_real *, t_real * );
 
-double lens_volume( int, double, double, double );
+t_real lens_volume( int, t_real, t_real, t_real );
 
-void sphere_gauss_point( int, double *, double, double *, long *, double *, double *, double *, double * );
+void sphere_gauss_point( int, t_real *, t_real, t_real *, long *, t_real *, t_real *, t_real *, t_real * );
 
-int load_points( char *, int *, int *, double **, int );
+int load_points( char *, int *, int *, t_real **, int );
 
-int write_points( char *, int, int, double *, int );
+int write_points( char *, int, int, t_real *, int );
 
-int generate_cloud_macqueen( int, int, int, int (*)(double*,void*), double (*)(double*,void*), double *, double **, void *, void * );
+int generate_cloud_macqueen( int, int, int, int (*)(t_real*,void*), t_real (*)(t_real*,void*), t_real *, t_real **, void *, void * );
 
-int smooth_cloud_macqueen( int, int, int, int (*)(double*,void*), double (*)(double*,void*), double *, double *, void *, void * );
+int smooth_cloud_macqueen( int, int, int, int (*)(t_real*,void*), t_real (*)(t_real*,void*), t_real *, t_real *, void *, void * );
 
-int smooth_cloud_bubble_mc( int, int, double *, int (*)(double*,void*), double (*)(double*,void*), double, double *, double *, double, double, int, int, void *, void * );
+int smooth_cloud_bubble_mc( int, int, t_real *, int (*)(t_real*,void*), t_real (*)(t_real*,void*), t_real, t_real *, t_real *, t_real, t_real, int, int, void *, void * );
 
-int generate_cloud_supports( int, int, double *, int, double, double * );
+int generate_cloud_supports( int, int, t_real *, int, t_real, t_real * );
 
-int generate_cloud_supports_min( int, int, double *, int, double, double *, double );
+int generate_cloud_supports_min( int, int, t_real *, int, t_real, t_real *, t_real );
 
 /**
  * Data structure for kd trees for use in nearest neighbor
@@ -50,21 +53,25 @@ struct kdnode_s
         int depth;
 	int npts;
 	int idx;
-	double split;
-        double *pos;
+	t_real split;
+        t_real *pos;
         struct kdnode_s *left;
         struct kdnode_s *right;
 };
 
 typedef struct kdnode_s kdnode_t;
 
-int kdtree_build_median( kdnode_t *, int, int, double *, int );
+int kdtree_build_median( kdnode_t *, int, int, t_real *, int );
 
-int kdtree_build_average( kdnode_t *, int, int, double *, int, int );
+int kdtree_build_average( kdnode_t *, int, int, t_real *, int, int );
 
-int kdtree_range_query( kdnode_t *, double *, double, int **, int *, int * );
+int kdtree_range_query( kdnode_t *, t_real *, t_real, int **, int *, int * );
 
 void kdtree_walk( kdnode_t * );
+
+void boundary_indicator( double *, shape_t *, double, int * );
+
+void load_domain( char *, shape_t *, int * );
 
 #endif
 

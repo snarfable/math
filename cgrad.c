@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
+#include "trees.h"
 
 #define CGRAD_ZERO 1e-15
 #define CGRAD_TREIG_PREPROCESS /* Function trofrm will fail if no preprocessing is done */
@@ -134,7 +135,7 @@ void vprint( FILE *fp, int n, double *x )
  * @param x Double precision floating point to check for zero
  * @return Returns 1 if zero, 0 otherwise
  */
-int iszero( double x )
+int is_zero( double x )
 {
     if( fabs( x ) < CGRAD_ZERO )
         return 1;
@@ -3042,13 +3043,13 @@ void treiglr( int n, double *alpha, double *beta, double *gamma, int max, double
         trrm( nn, s, d, l, u, dd, ll, uu );
 
         /* Now check the lower righthand corner 2x2 block */
-        if( ( nn > 1 && iszero( ll[nn-2] ) ) || nn == 1 ) /* Check in this order */
+        if( ( nn > 1 && is_zero( ll[nn-2] ) ) || nn == 1 ) /* Check in this order */
         {
             /* Then dd[nn-1] is an eigenvalue, so deflate by one */
             ev[2*k+0] = dd[nn-1], ev[2*k+1] = 0.0, ++k;
             nn -= 1;
         }
-        else if( ( nn > 2 && iszero( ll[nn-3] ) ) || nn == 2 ) /* Check in this order */
+        else if( ( nn > 2 && is_zero( ll[nn-3] ) ) || nn == 2 ) /* Check in this order */
         {
             tteig( dd[nn-2], uu[nn-2], ll[nn-2], dd[nn-1], &re1, &im1, &re2, &im2 );
             ev[2*k+0] = re1, ev[2*k+1] = im1, ++k;
@@ -3114,13 +3115,13 @@ void treigqds( int n, double *alpha, double *beta, double *gamma, int max, doubl
         }
 
         /* Now check the lower righthand corner 2x2 block */
-        if( ( nn > 1 && iszero( ll[nn-2] * uu[n-2] ) ) || nn == 1 ) /* Check in this order */
+        if( ( nn > 1 && is_zero( ll[nn-2] * uu[n-2] ) ) || nn == 1 ) /* Check in this order */
         {
             /* Then dd[nn-1] is an eigenvalue, so deflate by one */
             ev[2*k+0] = uu[nn-1] + ll[nn-2] + t, ev[2*k+1] = 0.0, ++k;
             nn -= 1;
         }
-        else if( ( nn > 2 && iszero( ll[nn-3] * uu[nn-2] ) ) || nn == 2 ) /* Check in this order */
+        else if( ( nn > 2 && is_zero( ll[nn-3] * uu[nn-2] ) ) || nn == 2 ) /* Check in this order */
         {
             if( nn - 2 == 0 )
                 tteig( uu[nn-2], 1.0, ll[nn-2] * uu[nn-2], ll[nn-2] + uu[nn-1], &re1, &im1, &re2, &im2 );
@@ -3200,13 +3201,13 @@ void treigdqds( int n, double *alpha, double *beta, double *gamma, int max, doub
         uu[nn-1] = d[nn-1];
 
         /* Now check the lower righthand corner 2x2 block */
-        if( ( nn > 1 && iszero( ll[nn-2] * uu[n-2] ) ) || nn == 1 ) /* Check in this order */
+        if( ( nn > 1 && is_zero( ll[nn-2] * uu[n-2] ) ) || nn == 1 ) /* Check in this order */
         {
             /* Then dd[nn-1] is an eigenvalue, so deflate by one */
             ev[2*k+0] = uu[nn-1] + ll[nn-2] + t, ev[2*k+1] = 0.0, ++k;
             nn -= 1;
         }
-        else if( ( nn > 2 && iszero( ll[nn-3] * uu[n-3] ) ) || nn == 2 ) /* Check in this order */
+        else if( ( nn > 2 && is_zero( ll[nn-3] * uu[n-3] ) ) || nn == 2 ) /* Check in this order */
         {
             if( nn - 2 == 0 )
                 tteig( uu[nn-2], 1.0, ll[nn-2] * uu[nn-2], ll[nn-2] + uu[nn-1], &re1, &im1, &re2, &im2 );
@@ -3280,7 +3281,7 @@ void treigtridqds( int n, double *alpha, double *beta, double *gamma, int max, d
         sr = re1; si = im1; /* Shift is not accumulated in tridqds */
 
         /* Choose which path to take */
-        if( iszero( si ) || nn < 4 ) /* If nn < 4 then we can't do tridqds so default to dqds */
+        if( is_zero( si ) || nn < 4 ) /* If nn < 4 then we can't do tridqds so default to dqds */
         {
             /* Choose a shift */
             s = re1;
@@ -3349,13 +3350,13 @@ void treigtridqds( int n, double *alpha, double *beta, double *gamma, int max, d
         }
 
         /* Now check the lower righthand corner 2x2 block of L(i)*U(i) */
-        if( ( nn > 1 && iszero( ll[nn-2] * uu[nn-2] ) ) || nn == 1 ) /* Check in this order */
+        if( ( nn > 1 && is_zero( ll[nn-2] * uu[nn-2] ) ) || nn == 1 ) /* Check in this order */
         {
             /* Then dd[nn-1] is an eigenvalue, so deflate by one */
             ev[2*k+0] = uu[nn-1] + ll[nn-2] + t, ev[2*k+1] = 0.0, ++k;
             nn -= 1;
         }
-        else if( ( nn > 2 && iszero( ll[nn-3] * uu[nn-3] ) ) || nn == 2 ) /* Check in this order */
+        else if( ( nn > 2 && is_zero( ll[nn-3] * uu[nn-3] ) ) || nn == 2 ) /* Check in this order */
         {
             if( nn - 2 == 0 )
                 tteig( uu[nn-2], 1.0, ll[nn-2] * uu[nn-2], ll[nn-2] + uu[nn-1], &re1, &im1, &re2, &im2 );
