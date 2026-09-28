@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0.0)
+cmake_minimum_required(VERSION 4.0.0)
 project(math VERSION 0.1.0)
 
 include(CTest)

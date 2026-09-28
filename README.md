@@ -1,12 +1,10 @@
-Introduction
-============
+#Introduction
 
 This is a library containing a set of basic basis functions
 which show up frequently in finite element methods and meshfree
 methods commonly.
 
-Basis Functions
-===============
+#Basis Functions
 
 The following basis functions are currently supported:
 
@@ -23,8 +21,7 @@ the basis function sets listed. As of the writing of this
 documentation, for some bases (like multquadrics) the
 generic derivative functions are incomplete.
 
-Targeted Changes
-================
+#Targeted Changes
 
 Ideally, we would like to be able generate derivatives
 of any basis function to any order and in any dimension.
