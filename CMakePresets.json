@@ -1,0 +1,99 @@
+{
+    "version": 8,
+    "configurePresets": [
+        {
+            "name": "configure-makefiles-production",
+            "displayName": "GCC 13.3.0 x86_64-linux-gnu",
+            "description": "Using compilers: C = /usr/bin/gcc, CXX = /usr/bin/g++",
+            "binaryDir": "${sourceDir}/out/build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
+                "CMAKE_C_COMPILER": "/usr/bin/gcc",
+                "CMAKE_CXX_COMPILER": "/usr/bin/g++",
+                "CMAKE_BUILD_TYPE": "Debug",
+                "HAVE_DOUBLE": "ON"
+            }
+        },
+        {
+            "name": "configure-makefiles-debug",
+            "inherits": "configure-makefiles-production",
+            "description": "Using compilers: C = /usr/bin/gcc, CXX = /usr/bin/g++",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+                "CMAKE_CXX_FLAGS": "-g -O0 -Wall -Wextra -Wpedantic -Werror",
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
+                "CMAKE_C_COMPILER": "/usr/bin/gcc",
+                "CMAKE_CXX_COMPILER": "/usr/bin/g++",
+                "CMAKE_CXX_STANDARD": "20",
+                "CMAKE_CXX_STANDARD_REQUIRED": "ON",
+                "CMAKE_CXX_EXTENSIONS": "OFF",
+                "HAVE_DOUBLE": "ON"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "build-makefiles-production",
+            "configurePreset": "configure-makefiles-production",
+            "description": "Build using the 'configure-makefiles-production' preset."
+        },
+        {
+            "name": "build-makefiles-debug",
+            "configurePreset": "configure-makefiles-debug",
+            "description": "Build using the 'configure-makefiles-debug' preset."
+        }
+    ],
+    "testPresets": [
+        {
+            "name": "test-makefiles-production",
+            "configurePreset": "configure-makefiles-production",
+            "output": {
+                "outputOnFailure": true
+            }
+        },
+        {
+            "name": "test-makefiles-debug",
+            "configurePreset": "configure-makefiles-debug",
+            "output": {
+                "outputOnFailure": true
+            }
+        }
+    ],
+    "workflowPresets": [
+        {
+            "name": "production",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "configure-makefiles-production"
+                },
+                {
+                    "type": "build",
+                    "name": "build-makefiles-production"
+                },
+                {
+                    "type": "test",
+                    "name": "test-makefiles-production"
+                }
+            ]
+        },
+        {
+            "name": "debug",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "configure-makefiles-debug"
+                },
+                {
+                    "type": "build",
+                    "name": "build-makefiles-debug"
+                },
+                {
+                    "type": "test",
+                    "name": "test-makefiles-debug"
+                }
+            ]
+        }
+    ]
+}
