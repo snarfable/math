@@ -47,6 +47,7 @@
 		"twxs.cmake",
 		"fredericbonnet.cmake-test-adapter",
 		"vector-of-bool.cmake-tools",
-		"maelvalais.autoconf"
+		"maelvalais.autoconf",
+		"ms-vscode.cpptools-extension-pack"
 	]
 }
