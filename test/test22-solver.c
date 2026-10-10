@@ -9,70 +9,70 @@ void eigenvalue_qrfactorize( int dim, int npts, double *pts, long *ibmat, long *
 	int i,j,k,p;
 	double xx;
 
-	for(p=0,k=0;k<npts;k++)
-        {
-                /* Orthogonalize only the set of boundary points */
-                if( on_boundary( pts + k * dim ) != 1 )
-                        continue;
+	for (p = 0, k = 0; k < npts; k++)
+	{
+		/* Orthogonalize only the set of boundary points */
+		if (on_boundary(pts + k * dim) != 1)
+			continue;
 
-                /* Insert the next vector of bmat into vv */
-                for(i=0;i<npts;i++)
-			rhs[i] = sparse_entry( k, i, npts, npts, ibmat, jbmat, bmat );
+		/* Insert the next vector of bmat into vv */
+		for (i = 0; i < npts; i++)
+			rhs[i] = sparse_entry(k, i, npts, npts, ibmat, jbmat, bmat);
 
-                /* Now project out all the previous orthogonal vectors stored in vv */
-                for(i=0;i<p;i++)
-                {
-                        xx = 0.0;
-                        for(j=0;j<npts;j++)
-                                xx += vv[i*npts+j] * rhs[j];
-                        for(j=0;j<npts;j++) 
-                                rhs[j] -= xx * vv[i*npts+j];
-                }
+		/* Now project out all the previous orthogonal vectors stored in vv */
+		for (i = 0; i < p; i++)
+		{
+			xx = 0.0;
+			for (j = 0; j < npts; j++)
+				xx += vv[i * npts + j] * rhs[j];
+			for (j = 0; j < npts; j++)
+				rhs[j] -= xx * vv[i * npts + j];
+		}
 
-                /* Now normalize rhs and store it in vv[p*npts+...] */
-                xx = 0.0;
-                for(i=0;i<npts;i++) 
-                        xx += rhs[i] * rhs[i];
-                xx = sqrt( xx );
-                for(i=0;i<npts;i++)
-                        vv[p*npts+i] = rhs[i] / xx;
+		/* Now normalize rhs and store it in vv[p*npts+...] */
+		xx = 0.0;
+		for (i = 0; i < npts; i++)
+			xx += rhs[i] * rhs[i];
+		xx = sqrt(xx);
+		for (i = 0; i < npts; i++)
+			vv[p * npts + i] = rhs[i] / xx;
 
-                /* Increment p since we got past the boundary test */
-                ++p;
-        }
+		/* Increment p since we got past the boundary test */
+		++p;
+	}
 }
 
-void eigenvalue_subprojmat( int npts, int nb, double *vv, double *ww )
+void eigenvalue_subprojmat(int npts, int nb, double *vv, double *ww)
 {
-	int i,j,k;
+	int i, j, k;
 	double xx;
 
-	for(i=0;i<npts-nb;i++)
+	for (i = 0; i < npts - nb; i++)
 	{
-		for(j=0;j<npts;j++)
-                	ww[i*npts+j] = ( rand() < RAND_MAX / 2 ? -1.0 : 1.0 ) * (double) rand() / (double) RAND_MAX;
-		for(j=0;j<nb;j++)
+		for (j = 0; j < npts; j++)
+			ww[i * npts + j] = (rand() < RAND_MAX / 2 ? -1.0 : 1.0) * (double)rand() / (double)RAND_MAX;
+		for (j = 0; j < nb; j++)
 		{
 			xx = 0.0;
-			for(k=0;k<npts;k++)
-				xx += ww[i*npts+k] * vv[j*npts+k];
-			for(k=0;k<npts;k++)
-				ww[i*npts+k] -= xx * vv[j*npts+k];
+			for (k = 0; k < npts; k++)
+				xx += ww[i * npts + k] * vv[j * npts + k];
+			for (k = 0; k < npts; k++)
+				ww[i * npts + k] -= xx * vv[j * npts + k];
 		}
-		for(j=0;j<i;j++)
+		for (j = 0; j < i; j++)
 		{
 			xx = 0.0;
-			for(k=0;k<npts;k++)
-                                xx += ww[i*npts+k] * ww[j*npts+k];
-                        for(k=0;k<npts;k++)
-                                ww[i*npts+k] -= xx * ww[j*npts+k];
+			for (k = 0; k < npts; k++)
+				xx += ww[i * npts + k] * ww[j * npts + k];
+			for (k = 0; k < npts; k++)
+				ww[i * npts + k] -= xx * ww[j * npts + k];
 		}
 		xx = 0.0;
-		for(j=0;j<npts;j++)
-			xx += ww[i*npts+j] * ww[i*npts+j];
-		xx = sqrt( xx );
-		for(j=0;j<npts;j++)
-			ww[i*npts+j] /= xx;
+		for (j = 0; j < npts; j++)
+			xx += ww[i * npts + j] * ww[i * npts + j];
+		xx = sqrt(xx);
+		for (j = 0; j < npts; j++)
+			ww[i * npts + j] /= xx;
 	}
 }
 
@@ -81,8 +81,8 @@ void eigenvalue_initialize( int npts, double *rhs )
 	int i;
 	double res;
 
-	for(i=0;i<npts;i++)
-               	rhs[i] = ( rand() < RAND_MAX / 2 ? -1.0 : 1.0 ) * (double) rand() / (double) RAND_MAX;
+	for (i = 0; i < npts; i++)
+		rhs[i] = (rand() < RAND_MAX / 2 ? -1.0 : 1.0) * (double)rand() / (double)RAND_MAX;
 	res = 0.0;
 	for(i=0;i<npts;i++)
 		res += rhs[i] * rhs[i];
