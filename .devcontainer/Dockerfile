@@ -11,5 +11,6 @@ RUN wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/nul
 RUN apt-get -y install locate
 RUN apt-get -y install git
 RUN apt-get -y install libgromacs-dev
+RUN apt-get -y install gcc-mingw-w64-x86-64 g++-mingw-w64-x86-64 gfortran-mingw-w64-x86-64 binutils-mingw-w64-x86-64 mingw-w64-tools
 
 ENTRYPOINT [ "/bin/bash" ]

@@ -30,6 +30,22 @@
                 "CMAKE_CXX_EXTENSIONS": "OFF",
                 "HAVE_DOUBLE": "ON"
             }
+        },
+        {
+            "name": "configure-makefiles-mingw-debug",
+            "displayName": "MinGW-w64 x86_64-w64-mingw32",
+            "description": "Builds the project for Windows using MinGW-w64 toolchain",
+            "toolchainFile": "cmake/toolchains/mingw-w64-x86_64.cmake",
+            "binaryDir": "${sourceDir}/out/build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
+                "CMAKE_CXX_STANDARD": "20",
+                "CMAKE_CXX_STANDARD_REQUIRED": "ON",
+                "CMAKE_CXX_EXTENSIONS": "OFF",
+                "CMAKE_BUILD_TYPE": "Debug",
+                "HAVE_DOUBLE": "ON"
+            }
         }
     ],
     "buildPresets": [
@@ -42,6 +58,11 @@
             "name": "build-makefiles-debug",
             "configurePreset": "configure-makefiles-debug",
             "description": "Build using the 'configure-makefiles-debug' preset."
+        },
+        {
+            "name": "build-makefiles-mingw-debug",
+            "configurePreset": "configure-makefiles-mingw-debug",
+            "description": "Build using the 'configure-makefiles-mingw-debug' preset."
         }
     ],
     "testPresets": [
